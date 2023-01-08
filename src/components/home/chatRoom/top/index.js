@@ -12,9 +12,6 @@ const ChatTop = () => {
         setOpen(true);
     };
 
-    const handleDrawerClose = () => {
-        setOpen(false);
-    };
     return (
         <>
             {data?.user &&
@@ -24,7 +21,7 @@ const ChatTop = () => {
                             <IconButton onClick={handleDrawerOpen} sx={{ display: { xs: "block", md: "none" } }}>
                                 <ArrowBack />
                             </IconButton>
-                            <Avatar>H</Avatar>
+                            <Avatar src={data?.user?.photoUrl} />
                             <Typography variant='h6'
                                 sx={{ color: "#444" }}
                             >
@@ -37,6 +34,7 @@ const ChatTop = () => {
                     </ChatTopBox>
                     <ChatDrawer {...{ open, setOpen }} />
                 </>
+
             }
 
         </>

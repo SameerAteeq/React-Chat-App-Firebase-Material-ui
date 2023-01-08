@@ -1,15 +1,19 @@
-import { Avatar, Box, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
-import { doc, onSnapshot } from 'firebase/firestore';
+import { MoreVert, VerticalAlignBottom } from '@mui/icons-material';
+import { Avatar, Box, IconButton, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import { deleteDoc, deleteField, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../../../../context/AuthContext';
 import { ChatContext } from '../../../../context/ChatContext';
 import { db } from '../../../../firebase';
-import { SideBarchatBox } from '../../../../style/sidebar'
+import { LastMessage, SideBarchatBox } from '../../../../style/sidebar'
+import PopOver from '../../../common/popover';
 
 const AllUsers = () => {
+    const [chats, setChats] = useState([]);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [userId, setuserId] = useState("");
     const { currentUser } = useContext(AuthContext);
     const { dispatch } = useContext(ChatContext);
-    const [chats, setChats] = useState([]);
 
     useEffect(() => {
         const getChats = () => {
@@ -22,42 +26,59 @@ const AllUsers = () => {
         }
         currentUser?.uid && getChats()
     }, [currentUser.uid])
-    console.log("Current data: ", chats);
-    console.log("Current data entries: ", Object?.entries(chats)?.sort((a, b) => b[1] - a[1]));
-    const handleSelect = (user) => [
+    const handleSelect = (user) => {
         dispatch({ type: "CHANGE_USER", payload: user })
-    ]
+    }
+    const handleClick = (id, event) => {
+        setAnchorEl(event.currentTarget);
+        setuserId(id)
+    };
+    const delUser = async (userId) => {
+        try {
+            await deleteDoc(doc(db, "chats", userId));
+            await updateDoc(doc(db, "userchats", currentUser.uid), {
+                [userId]: deleteField()
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    }
     return (
         <>
             <SideBarchatBox>
-
-
                 <List >
                     {
                         Object?.entries(chats)?.sort((a, b) => b[1] - a[1])?.map((chat) => (
-                            <Box sx={{ padding: '5px', width: "100%", cursor: "pointer", "&:hover": { backgroundColor: "skyblue" } }}>
-
+                            <Box
+                                key={chat[0]}
+                                sx={{
+                                    width: "100%",
+                                    cursor: "pointer",
+                                    "&:hover": { backgroundColor: "#154c79" },
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center"
+                                }}
+                            >
                                 <ListItem onClick={() => handleSelect(chat[1]?.userInfo)}
-                                    key={chat[0]}
-                                    disablePadding
                                     sx={{ display: "flex", direction: "row", gap: "10px", mb: "10px" }}
                                 >
-                                    <Avatar src='https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1480&q=80' />
+                                    <Avatar src={chat[1]?.userInfo?.photoURL} />
                                     <Stack direction="column" gap={0}>
-                                        <Typography disablePadding sx={{ color: "#fff" }}  >{chat[1]?.userInfo?.displayName}</Typography>
-                                        <Typography variant='body2' sx={{
-                                            display: "-webkit-box",
-                                            "-webkit-box-orient": "vertical",
-                                            color: "#333", overflow: "hidden",
-                                            "-webkit-line-clamp": "1"
-                                        }} >{chat[1]?.lastMessage?.text}</Typography>
+                                        <Typography disablePadding sx={{ color: "#fff" }}  >
+                                            {chat[1]?.userInfo?.displayName}
+                                        </Typography>
+                                        <LastMessage variant='body2'  >{chat[1]?.lastMessage?.text}</LastMessage>
                                     </Stack>
                                 </ListItem>
+                                <IconButton onClick={(e) => handleClick(chat[0], e)}>
+                                    <MoreVert sx={{ color: "#fff", fontSize: "18px" }} />
+                                </IconButton>
                             </Box>
-
                         ))
                     }
                 </List>
+                <PopOver {...{ anchorEl, setAnchorEl, userId, setuserId, delUser }} />
 
             </SideBarchatBox >
         </>

@@ -11,15 +11,14 @@ const ChatRoom = () => {
     const { data } = useContext(ChatContext);
     return (
         <Box sx={{ background: "#fff", height: "100%", borderRadius: "0 10px 10px 0" }}>
-            {data?.user ?
+            {data ?
                 <>
                     <ChatTop />
                     <Messages />
                     <ChatBottom />
-                </> :
+                </>
+                :
                 <EmptyChat />
-
-
             }
         </Box>
     )

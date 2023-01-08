@@ -1,19 +1,24 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { SidebarTopBox } from '../../../../style/sidebar'
-import { Avatar, Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material'
-import { Add } from '@mui/icons-material'
+import { Avatar, Box, Button, Divider, IconButton, InputAdornment, OutlinedInput, Stack, TextField, Typography } from '@mui/material'
+import { Add, Search } from '@mui/icons-material'
 import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../../../firebase'
 import { toast } from 'react-hot-toast'
 import { AuthContext } from '../../../../context/AuthContext'
+import { ChatContext } from '../../../../context/ChatContext'
 
 const SideBarTop = () => {
     const { currentUser } = useContext(AuthContext);
+    const { dispatch } = useContext(ChatContext);
     const [userName, setUserName] = useState("");
     const [user, setUser] = useState(null);
     const [err, setErr] = useState(false);
+    const ref = useRef(null);
+    const handleInput = () => {
+        ref.current.focus();
+    }
     const handleSearch = async () => {
-
         const q = query(collection(db, "users"),
             where("displayName", "==", userName))
         try {
@@ -31,7 +36,7 @@ const SideBarTop = () => {
     const handleKey = (e) => {
         e.code === "Enter" && handleSearch();
     }
-    const handleSelect = async () => {
+    const handleSelect = async (user) => {
         //checking the chat between user exist in firestore, otherwise create
         const combinedId = currentUser.uid > user.uid ?
             currentUser.uid + user.uid :
@@ -60,12 +65,14 @@ const SideBarTop = () => {
                     [combinedId + ".date"]: serverTimestamp()
                 });
             }
+            dispatch({ type: "CHANGE_USER", payload: user })
         } catch (err) {
             console.log(err.message)
         }
-        // setUser(null);
+        setUser(null);
         setUserName("")
     }
+    console.log(user, "user")
     return (
         <>
             <Box sx={{ padding: "14px", display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -74,6 +81,7 @@ const SideBarTop = () => {
                         Chats
                     </Typography>
                     <IconButton size='small'
+                        onClick={handleInput}
                         sx={{
                             background: "#fff",
                             "&:hover": { backgroundColor: "#fff" }
@@ -81,7 +89,8 @@ const SideBarTop = () => {
                         <Add sx={{ fontSize: "28px", color: '#1379aa' }} />
                     </IconButton>
                 </SidebarTopBox>
-                <TextField
+                <OutlinedInput
+                    inputRef={ref}
                     sx={{
                         input: {
                             color: "#fff"
@@ -93,14 +102,25 @@ const SideBarTop = () => {
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     onKeyDown={handleKey}
+                    endAdornment={
+                        <InputAdornment position="end">
+                            <IconButton
+                                aria-label="toggle password visibility"
+                                onClick={handleSearch}
+                                edge="end"
+                            >
+                                <Search sx={{ color: "#fff" }} />
+                            </IconButton>
+                        </InputAdornment>
+                    }
                 />
 
                 {err && <p> Not </p>}
                 {user &&
                     <>
                         <Box sx={{ cursor: "pointer", }} >
-                            <Stack onClick={handleSelect} direction={"row"} alignItems="center" gap="10px" mb={2}>
-                                <Avatar src='https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1480&q=80' />
+                            <Stack onClick={() => handleSelect(user)} direction={"row"} alignItems="center" gap="10px" mb={2}>
+                                <Avatar src={user?.photoURL} />
                                 <Typography sx={{ color: "#fff", fontSize: "18px" }} variant="body2">{user?.displayName}</Typography>
                             </Stack>
                             <Divider />

@@ -11,7 +11,6 @@ import { AuthContext, AuthContextProvider } from "./context/AuthContext";
 import { useContext } from "react";
 function App() {
   const { currentUser } = useContext(AuthContext);
-  console.log(currentUser, "user in app")
   return (
     <ThemeProvider theme={theme}>
       <Toaster />

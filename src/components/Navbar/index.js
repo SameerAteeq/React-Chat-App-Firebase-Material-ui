@@ -5,9 +5,13 @@ import React, { useContext } from 'react'
 import { auth } from '../../firebase';
 import { NavbarBox } from '../../style/navbar'
 import { AuthContext } from "../../context/AuthContext"
+import Profile from '../profile';
 const Navbar = () => {
     const { currentUser } = useContext(AuthContext)
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [openProfile, setOpenProfile] = React.useState(false);
+    const handleOpenProfile = () => setOpenProfile(true);
+    const handleCloseProfile = () => setOpenProfile(false);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -22,7 +26,7 @@ const Navbar = () => {
                     {currentUser?.displayName}
                 </Typography>
                 <IconButton onClick={handleClick}>
-                    <Avatar src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=580&q=80' />
+                    <Avatar src={currentUser?.photoURL} />
                 </IconButton>
                 <Menu
                     anchorEl={anchorEl}
@@ -59,9 +63,9 @@ const Navbar = () => {
                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                    <MenuItem>
+                    <MenuItem onClick={handleOpenProfile}>
                         <Stack direction="row" alignItems="center" >
-                            <Avatar sx={{ height: "100px", width: "70px" }} src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=580&q=80" />
+                            <Avatar sx={{ height: "100px", width: "70px" }} src={currentUser?.photoURL} />
                             <Stack direction="column" >
                                 <Typography variant='h6'>
                                     {currentUser?.displayName}
@@ -79,6 +83,7 @@ const Navbar = () => {
                     </MenuItem>
                 </Menu>
             </NavbarBox>
+            <Profile {...{ openProfile, setOpenProfile }} />
         </Box>
     )
 }

@@ -26,7 +26,6 @@ const Messages = () => {
             unSub();
         }
     }, [data.chatId])
-    console.log(msgs, "in msg");
     return (
         <>
             <MessagesBox >

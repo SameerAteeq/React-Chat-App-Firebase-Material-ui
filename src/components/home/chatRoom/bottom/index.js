@@ -1,13 +1,12 @@
 import { AddPhotoAlternate, Send } from '@mui/icons-material'
 import { Box, IconButton, Stack, TextField, Tooltip } from '@mui/material'
 import { arrayUnion, doc, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { AuthContext } from '../../../../context/AuthContext';
 import { ChatContext } from '../../../../context/ChatContext';
 import { db, storage } from '../../../../firebase';
 import { v4 as uuid } from 'uuid';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { toast } from 'react-hot-toast';
 
 const ChatBottom = () => {
     const { currentUser } = useContext(AuthContext);
